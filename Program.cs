@@ -1,3 +1,4 @@
+using Auth;
 using Microsoft.AspNetCore.DataProtection;
 using System.Security.Claims;
 
@@ -7,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDataProtection();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<AuthService>();
 
 
 var app = builder.Build();
@@ -39,10 +41,9 @@ app.MapGet("/username", (IHttpContextAccessor ctx, IDataProtectionProvider idp) 
     return username;
 });
 
-app.MapGet("/login", (HttpContext ctx, IDataProtectionProvider idp) =>
+app.MapGet("/login", (AuthService auth) =>
 {
-    var protectedCookie = idp.CreateProtector("auth").Protect("mustafa");
-    ctx.Response.Headers["Set-Cookie"] = $"username={protectedCookie}";
+    auth.SignIn();
     return "OK";
 });
 
